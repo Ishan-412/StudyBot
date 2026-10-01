@@ -49,114 +49,278 @@ st.markdown(
     /* ── Google Font ── */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+    /* ── Global typography ── */
     html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', sans-serif !important;
     }
 
-    /* ── App background ── */
+    /* ── App background: GitHub-dark inspired ── */
     .stApp {
-        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-        min-height: 100vh;
+        background-color: #0d1117 !important;
+    }
+
+    /* ── Force all text white/light so nothing merges with background ── */
+    .stApp p, .stApp span, .stApp div, .stApp label,
+    .stApp li, .stApp ol, .stApp ul,
+    .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6 {
+        color: #e6edf3 !important;
     }
 
     /* ── Sidebar ── */
     [data-testid="stSidebar"] {
-        background: rgba(255,255,255,0.05);
-        backdrop-filter: blur(12px);
-        border-right: 1px solid rgba(255,255,255,0.1);
+        background-color: #161b22 !important;
+        border-right: 1px solid #30363d !important;
+    }
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] label {
+        color: #c9d1d9 !important;
+    }
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #f0f6fc !important;
     }
 
-    /* ── Chat bubbles ── */
+    /* ── Input boxes ── */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea {
+        background-color: #21262d !important;
+        color: #e6edf3 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 8px !important;
+    }
+    .stTextInput > div > div > input:focus,
+    .stTextArea > div > div > textarea:focus {
+        border-color: #58a6ff !important;
+        box-shadow: 0 0 0 3px rgba(88,166,255,0.2) !important;
+    }
+    .stTextInput input::placeholder,
+    .stTextArea textarea::placeholder {
+        color: #6e7681 !important;
+    }
+
+    /* ── Selectbox ── */
+    .stSelectbox > div > div {
+        background-color: #21262d !important;
+        color: #e6edf3 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 8px !important;
+    }
+
+    /* ── File uploader ── */
+    [data-testid="stFileUploader"] {
+        background-color: #21262d !important;
+        border: 2px dashed #30363d !important;
+        border-radius: 10px !important;
+    }
+    [data-testid="stFileUploader"] span,
+    [data-testid="stFileUploader"] p {
+        color: #8b949e !important;
+    }
+
+    /* ── All buttons (default) ── */
+    .stButton > button {
+        background-color: #21262d !important;
+        color: #e6edf3 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease !important;
+    }
+    .stButton > button:hover {
+        background-color: #30363d !important;
+        border-color: #58a6ff !important;
+        transform: translateY(-1px) !important;
+    }
+    /* Primary buttons (blue) */
+    [data-testid="baseButton-primary"],
+    [data-testid="baseButton-primaryFormSubmit"] {
+        background: linear-gradient(135deg, #1f6feb, #388bfd) !important;
+        color: #ffffff !important;
+        border: 1px solid #388bfd !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="baseButton-primary"]:hover,
+    [data-testid="baseButton-primaryFormSubmit"]:hover {
+        background: linear-gradient(135deg, #388bfd, #58a6ff) !important;
+        box-shadow: 0 4px 14px rgba(56,139,253,0.4) !important;
+    }
+    /* Secondary form buttons */
+    [data-testid="baseButton-secondaryFormSubmit"] {
+        background-color: #21262d !important;
+        color: #e6edf3 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 8px !important;
+    }
+    [data-testid="baseButton-secondaryFormSubmit"]:hover {
+        background-color: #30363d !important;
+        border-color: #58a6ff !important;
+    }
+
+    /* ── Tabs ── */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #161b22 !important;
+        border-radius: 10px !important;
+        padding: 4px !important;
+        gap: 4px !important;
+        border: 1px solid #30363d !important;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: transparent !important;
+        border-radius: 7px !important;
+        padding: 8px 20px !important;
+        font-weight: 500 !important;
+    }
+    .stTabs [data-baseweb="tab"] p,
+    .stTabs [data-baseweb="tab"] span {
+        color: #8b949e !important;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #21262d !important;
+    }
+    .stTabs [aria-selected="true"] p,
+    .stTabs [aria-selected="true"] span {
+        color: #f0f6fc !important;
+        font-weight: 600 !important;
+    }
+
+    /* ── Progress bar ── */
+    .stProgress > div > div {
+        background-color: #1f6feb !important;
+        border-radius: 4px !important;
+    }
+
+    /* ── Alert boxes ── */
+    [data-testid="stAlert"] { border-radius: 8px !important; }
+    [data-testid="stAlert"] p { color: inherit !important; }
+
+    /* ── Horizontal rule ── */
+    hr { border-color: #30363d !important; margin: 16px 0 !important; }
+
+    /* ── Chat bubbles: user ── */
     .chat-user {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: #fff;
+        background: linear-gradient(135deg, #1f6feb, #388bfd);
+        color: #ffffff !important;
         border-radius: 18px 18px 4px 18px;
         padding: 14px 18px;
         margin: 10px 0;
         max-width: 80%;
         margin-left: auto;
-        box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+        font-size: 0.97em;
+        line-height: 1.6;
+        box-shadow: 0 4px 14px rgba(31,111,235,0.35);
+        word-wrap: break-word;
     }
+
+    /* ── Chat bubbles: bot ── */
     .chat-bot {
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.15);
+        background-color: #161b22;
+        border: 1px solid #30363d;
         border-radius: 18px 18px 18px 4px;
         padding: 14px 18px;
         margin: 10px 0;
         max-width: 90%;
-        color: #e0e0e0;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        color: #e6edf3 !important;
+        font-size: 0.97em;
+        line-height: 1.6;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+        word-wrap: break-word;
     }
+    .chat-bot * { color: #e6edf3 !important; }
+
+    /* ── Sources box ── */
     .sources-box {
-        background: rgba(102,126,234,0.1);
-        border: 1px solid rgba(102,126,234,0.3);
-        border-radius: 10px;
+        background-color: #0a1929;
+        border: 1px solid #1f6feb;
+        border-left: 3px solid #388bfd;
+        border-radius: 8px;
         padding: 10px 14px;
-        margin-top: 6px;
-        font-size: 0.82em;
-        color: #a0aec0;
+        margin-top: 8px;
+        font-size: 0.85em;
+        color: #79c0ff !important;
+        line-height: 1.8;
     }
+    .sources-box * { color: #79c0ff !important; }
 
     /* ── Flashcard ── */
     .flashcard {
-        background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 14px;
-        padding: 18px 22px;
-        margin: 8px 0;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        background-color: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin: 10px 0;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
     .flashcard:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(102,126,234,0.2);
+        transform: translateY(-3px);
+        border-color: #388bfd;
+        box-shadow: 0 8px 24px rgba(56,139,253,0.2);
     }
     .flashcard-q {
-        color: #7c8ee8;
-        font-weight: 600;
+        color: #79c0ff !important;
+        font-weight: 700;
         font-size: 1em;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
     .flashcard-a {
-        color: #e0e0e0;
+        color: #e6edf3 !important;
         font-size: 0.95em;
-        line-height: 1.5;
+        line-height: 1.6;
+        padding-top: 10px;
+        border-top: 1px solid #30363d;
+        margin-top: 4px;
     }
 
-    /* ── Buttons ── */
-    .stButton > button {
-        border-radius: 10px !important;
-        font-weight: 600 !important;
-        transition: all 0.2s ease !important;
-    }
-    .stButton > button:hover {
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(102,126,234,0.4) !important;
-    }
-
-    /* ── Section headers ── */
+    /* ── Section header ── */
     .section-header {
-        font-size: 1.4em;
+        font-size: 1.5em;
         font-weight: 700;
-        color: #fff;
+        color: #f0f6fc !important;
         margin-bottom: 16px;
-        padding-bottom: 8px;
-        border-bottom: 2px solid rgba(102,126,234,0.5);
+        padding-bottom: 10px;
+        border-bottom: 2px solid #1f6feb;
     }
 
     /* ── Welcome banner ── */
     .welcome-banner {
         text-align: center;
-        padding: 60px 20px 30px;
-        color: rgba(255,255,255,0.5);
+        padding: 80px 20px 40px;
     }
     .welcome-banner h1 {
         font-size: 3em;
         font-weight: 700;
-        background: linear-gradient(135deg, #667eea, #f093fb);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #f0f6fc !important;
+        margin-bottom: 12px;
     }
+    .welcome-banner p {
+        color: #8b949e !important;
+        font-size: 1.1em;
+    }
+
+    /* ── Caption / small text ── */
+    [data-testid="stCaptionContainer"] p { color: #8b949e !important; }
+
+    /* ── Markdown rendered inside app ── */
+    .stMarkdown p, .stMarkdown li, .stMarkdown td, .stMarkdown th {
+        color: #e6edf3 !important;
+    }
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
+        color: #f0f6fc !important;
+    }
+    .stMarkdown strong, .stMarkdown b { color: #f0f6fc !important; }
+    .stMarkdown code {
+        background-color: #21262d !important;
+        color: #ff7b72 !important;
+        border-radius: 4px;
+        padding: 2px 6px;
+    }
+    .stMarkdown a { color: #58a6ff !important; }
+
+    /* ── Spinner ── */
+    [data-testid="stSpinner"] p { color: #58a6ff !important; }
     </style>
     """,
     unsafe_allow_html=True,

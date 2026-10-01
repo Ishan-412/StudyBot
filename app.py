@@ -327,10 +327,22 @@ st.markdown(
 )
 
 # ── Session state initialisation ──────────────────────────────────────────────
+def _discover_subjects():
+    from utils.config import DATA_DIR
+    import os
+    if not DATA_DIR.exists():
+        return []
+    # Any folder in data/ that contains an index is a valid subject
+    subs = []
+    for entry in os.listdir(DATA_DIR):
+        if (DATA_DIR / entry).is_dir() and (DATA_DIR / entry / "index.faiss").exists():
+            subs.append(entry)
+    return sorted(subs)
+
 if "subjects" not in st.session_state:
-    st.session_state.subjects: list[str] = []
+    st.session_state.subjects = _discover_subjects()
 if "active_subject" not in st.session_state:
-    st.session_state.active_subject: str | None = None
+    st.session_state.active_subject = st.session_state.subjects[0] if st.session_state.subjects else None
 if "chat_history" not in st.session_state:
     st.session_state.chat_history: list[dict] = []
 if "pending_uploads" not in st.session_state:
@@ -352,25 +364,16 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # ── Subject management ──────────────────────────────────────────────────
-    st.markdown("### 📂 Subjects")
-
-    new_subject = st.text_input(
-        "Create a new subject",
-        placeholder="e.g. Machine Learning",
-        key="new_subject_input",
+    app_mode = st.radio(
+        "Navigation",
+        ["📚 Study Mode", "⚙️ Manage Subjects & Files"],
+        label_visibility="collapsed"
     )
-    if st.button("➕ Add Subject", use_container_width=True):
-        ns = new_subject.strip()
-        if not ns:
-            st.warning("Please enter a subject name.")
-        elif ns in st.session_state.subjects:
-            st.warning(f"'{ns}' already exists.")
-        else:
-            st.session_state.subjects.append(ns)
-            st.session_state.active_subject = ns
-            st.rerun()
 
+    st.markdown("---")
+
+    # ── Subject Selection (Always visible) ──────────────────────────────────
+    st.markdown("### 📂 Select Subject")
     if st.session_state.subjects:
         chosen = st.selectbox(
             "Select subject",
@@ -380,87 +383,107 @@ with st.sidebar:
                 if st.session_state.active_subject in st.session_state.subjects
                 else 0
             ),
+            label_visibility="collapsed",
             key="subject_selector",
         )
         st.session_state.active_subject = chosen
     else:
-        st.info("No subjects yet. Create one above.")
-
+        st.info("No subjects yet. Go to Manage to create one.")
+    
     st.markdown("---")
 
-    # ── PDF uploader ────────────────────────────────────────────────────────
-    if st.session_state.active_subject:
-        st.markdown(f"### 📄 Upload PDFs")
-        st.caption(f"Subject: **{st.session_state.active_subject}**")
-
-        uploaded_files = st.file_uploader(
-            "Upload lecture notes / syllabus",
-            type=["pdf"],
-            accept_multiple_files=True,
-            key="pdf_uploader",
+    # ── Mode: Manage Subjects & Files ───────────────────────────────────────
+    if app_mode == "⚙️ Manage Subjects & Files":
+        st.markdown("### ➕ Create Subject")
+        new_subject = st.text_input(
+            "Create a new subject",
+            placeholder="e.g. Machine Learning",
+            key="new_subject_input",
         )
-
-        # ── Index Documents button ──────────────────────────────────────────
-        if st.button("⚡ Index Documents", type="primary", use_container_width=True):
-            if not uploaded_files:
-                st.warning("Upload at least one PDF first.")
+        if st.button("Add Subject", use_container_width=True):
+            ns = new_subject.strip()
+            if not ns:
+                st.warning("Please enter a subject name.")
+            elif ns in st.session_state.subjects:
+                st.warning(f"'{ns}' already exists.")
             else:
-                subject = st.session_state.active_subject
-                upload_dir = get_subject_upload_dir(subject)
+                st.session_state.subjects.append(ns)
+                st.session_state.active_subject = ns
+                st.rerun()
+                
+        st.markdown("---")
 
-                progress = st.progress(0, text="Starting indexing…")
-                total    = len(uploaded_files)
-                indexed  = 0
-                skipped  = 0
-                errors   = []
+        if st.session_state.active_subject:
+            st.markdown(f"### 📄 Upload PDFs")
+            st.caption(f"To: **{st.session_state.active_subject}**")
 
-                for i, uf in enumerate(uploaded_files):
-                    progress.progress(
-                        (i + 1) / total,
-                        text=f"Processing {uf.name} …",
-                    )
+            uploaded_files = st.file_uploader(
+                "Upload lecture notes / syllabus",
+                type=["pdf"],
+                accept_multiple_files=True,
+                key="pdf_uploader",
+            )
 
-                    if is_already_indexed(subject, uf.name):
-                        skipped += 1
-                        continue
+            if st.button("⚡ Index Documents", type="primary", use_container_width=True):
+                if not uploaded_files:
+                    st.warning("Upload at least one PDF first.")
+                else:
+                    subject = st.session_state.active_subject
+                    upload_dir = get_subject_upload_dir(subject)
 
-                    # Save to disk
-                    save_path = upload_dir / uf.name
-                    with open(save_path, "wb") as f:
-                        f.write(uf.getbuffer())
+                    progress = st.progress(0, text="Starting indexing…")
+                    total    = len(uploaded_files)
+                    indexed  = 0
+                    skipped  = 0
+                    errors   = []
 
-                    # Extract + chunk + index
-                    try:
-                        pages = load_pdf(save_path, subject)
-                        docs  = chunk_pages(pages)
-                        add_documents(subject, docs)
-                        record_indexed_file(
-                            subject, uf.name,
-                            pages=len(pages), chunks=len(docs),
+                    for i, uf in enumerate(uploaded_files):
+                        progress.progress(
+                            (i + 1) / total,
+                            text=f"Processing {uf.name} …",
                         )
-                        indexed += 1
-                    except PDFLoadError as exc:
-                        errors.append(f"**{uf.name}**: {exc}")
-                    except Exception as exc:
-                        errors.append(f"**{uf.name}**: Unexpected error — {exc}")
 
-                progress.empty()
+                        if is_already_indexed(subject, uf.name):
+                            skipped += 1
+                            continue
 
-                if indexed:
-                    st.success(f"✅ Indexed {indexed} file(s).")
-                if skipped:
-                    st.info(f"ℹ️ {skipped} file(s) already indexed (skipped).")
-                for err in errors:
-                    st.error(err)
+                        # Save to disk
+                        save_path = upload_dir / uf.name
+                        with open(save_path, "wb") as f:
+                            f.write(uf.getbuffer())
 
-        # ── List already-indexed docs ───────────────────────────────────────
-        indexed_docs = list_indexed_files(st.session_state.active_subject)
-        if indexed_docs:
-            st.markdown("**Indexed documents:**")
-            for doc in indexed_docs:
-                st.markdown(f"&nbsp;&nbsp;📑 {doc}", unsafe_allow_html=True)
-        else:
-            st.caption("No documents indexed yet for this subject.")
+                        # Extract + chunk + index
+                        try:
+                            pages = load_pdf(save_path, subject)
+                            docs  = chunk_pages(pages)
+                            add_documents(subject, docs)
+                            record_indexed_file(
+                                subject, uf.name,
+                                pages=len(pages), chunks=len(docs),
+                            )
+                            indexed += 1
+                        except PDFLoadError as exc:
+                            errors.append(f"**{uf.name}**: {exc}")
+                        except Exception as exc:
+                            errors.append(f"**{uf.name}**: Unexpected error — {exc}")
+
+                    progress.empty()
+
+                    if indexed:
+                        st.success(f"✅ Indexed {indexed} file(s).")
+                    if skipped:
+                        st.info(f"ℹ️ {skipped} file(s) already indexed (skipped).")
+                    for err in errors:
+                        st.error(err)
+
+            # ── List already-indexed docs ───────────────────────────────────────
+            indexed_docs = list_indexed_files(st.session_state.active_subject)
+            if indexed_docs:
+                st.markdown("**Indexed documents:**")
+                for doc in indexed_docs:
+                    st.markdown(f"&nbsp;&nbsp;📑 {doc}", unsafe_allow_html=True)
+            else:
+                st.caption("No documents indexed yet for this subject.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -512,10 +535,16 @@ with col_badge:
         )
 
 if not has_index:
-    st.info(
-        "📭 No documents are indexed for this subject yet. "
-        "Upload PDFs in the sidebar and click **⚡ Index Documents**."
-    )
+    if app_mode == "⚙️ Manage Subjects & Files":
+        st.info(
+            "📭 No documents are indexed for this subject yet. "
+            "Upload PDFs in the sidebar and click **⚡ Index Documents**."
+        )
+    else:
+        st.info(
+            "📭 No documents are indexed for this subject yet. "
+            "Please switch to **⚙️ Manage Subjects & Files** in the sidebar to upload your notes."
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

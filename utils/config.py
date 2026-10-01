@@ -13,7 +13,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ── Gemini ──────────────────────────────────────────────────────────────────
-GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+_raw_key = os.getenv("GEMINI_API_KEY", "").strip()
+GEMINI_API_KEY: str = "" if _raw_key == "your_gemini_api_key_here" else _raw_key
 GEMINI_MODEL: str = "gemini-1.5-flash"          # fast & cheap for student use
 
 # ── Embedding model ─────────────────────────────────────────────────────────
